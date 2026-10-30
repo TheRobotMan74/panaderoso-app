@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recetas Panaderoso</title>
+<meta name="theme-color" content="#a0522d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recetas">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+  :root {
+    --fondo: #fbf6ef; --tarjeta: #ffffff; --tinta: #3b2a1e; --suave: #8a7462;
+    --cafe: #a0522d; --cafe-osc: #7c3f22; --borde: #eadfd2; --amarillo: #fff8d6;
+    --bien: #2e7d4f; --mal: #c0392b; --aviso: #b7791f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--tinta);
+         font: 15px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding-bottom: 250px; }
+  header { background: var(--cafe); color: #fff; padding: 12px 14px; padding-top: calc(12px + env(safe-area-inset-top)); }
+  header h1 { margin: 0 0 8px; font-size: 17px; display: flex; align-items: center; justify-content: space-between; }
+  .btn-ajustes { background: transparent; color: #fff; font-size: 20px; padding: 0 4px; }
+  .offline { background: #fff3cd; color: #7a5a00; text-align: center; font-size: 13px; padding: 6px 10px; display: none; }
+  .offline.si { display: block; }
+  .fila { display: flex; gap: 8px; align-items: center; }
+  .fila > * { flex: 1; min-width: 0; }
+  select, input { width: 100%; font: inherit; color: var(--tinta); padding: 9px 10px; border: 1px solid var(--borde);
+                  border-radius: 9px; background: var(--amarillo); }
+  header select { background: #fff; }
+  input:focus, select:focus { outline: 2px solid var(--cafe); outline-offset: -1px; }
+  button { font: inherit; border: 0; border-radius: 9px; padding: 9px 12px; cursor: pointer; }
+  .btn-claro { background: #fff; color: var(--cafe-osc); font-weight: 600; flex: 0 0 auto; }
+  .btn { background: var(--cafe); color: #fff; font-weight: 600; }
+  .btn:disabled { opacity: .5; }
+  .btn-linea { background: transparent; color: var(--cafe); border: 1px dashed var(--cafe); width: 100%; font-weight: 600; }
+  .btn-texto { background: transparent; color: var(--suave); padding: 6px 8px; }
+  main { padding: 12px; max-width: 640px; margin: 0 auto; }
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+  .tarjeta h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); margin: 0 0 10px; }
+  label { display: block; font-size: 12px; color: var(--suave); margin-bottom: 3px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .campo { margin-bottom: 10px; }
+  .ing { border-bottom: 1px solid var(--borde); padding: 10px 0; }
+  .ing:last-of-type { border-bottom: 0; }
+  .ing .arriba { display: flex; gap: 6px; align-items: center; }
+  .ing .arriba input { flex: 1; }
+  .quitar { background: transparent; color: var(--suave); font-size: 20px; padding: 2px 8px; flex: 0 0 auto; }
+  .ing .abajo { display: grid; grid-template-columns: 1.1fr 1fr 0.9fr; gap: 6px; margin-top: 6px; align-items: center; }
+  .cant { position: relative; }
+  .cant span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--suave); font-size: 13px; pointer-events: none; }
+  .cant input { padding-right: 38px; }
+  .costo { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .costo small { display: block; font-weight: 400; color: var(--suave); font-size: 11px; }
+  .falta { color: var(--aviso); font-size: 12px; margin-top: 4px; }
+  .falta a { color: var(--cafe); font-weight: 600; cursor: pointer; text-decoration: underline; }
+  .resumen { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 2px solid var(--borde);
+             padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(60,40,20,.08); }
+  .resumen .datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 640px; margin: 0 auto 8px; }
+  .dato { background: var(--fondo); border-radius: 9px; padding: 6px 8px; }
+  .dato b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .dato span { font-size: 11px; color: var(--suave); }
+  .bien { color: var(--bien); } .mal { color: var(--mal); }
+  .acciones { display: flex; gap: 8px; max-width: 640px; margin: 0 auto; }
+  .acciones .btn { flex: 1; }
+  .aviso { padding: 10px 12px; border-radius: 9px; margin-bottom: 12px; font-size: 14px; display: none; }
+  .aviso.ok { display: block; background: #e5f4ea; color: var(--bien); }
+  .aviso.error { display: block; background: #fbe9e7; color: var(--mal); }
+  .cargando { text-align: center; color: var(--suave); padding: 40px 0; }
+  .modal { position: fixed; inset: 0; background: rgba(40,25,15,.45); display: none; align-items: flex-end; justify-content: center; z-index: 10; }
+  .modal.abierto { display: flex; }
+  .modal .caja { background: #fff; width: 100%; max-width: 520px; border-radius: 16px 16px 0 0; padding: 16px; max-height: 90vh; overflow: auto; }
+  .modal h3 { margin: 0 0 12px; }
+  .nota { font-size: 12px; color: var(--suave); }
+  .encabezados { display: none; }
+
+  /* Pantalla amplia (ventana grande o el link en la compu): ingredientes en una sola línea */
+  @media (min-width: 760px) {
+    body { padding-bottom: 150px; }
+    header, main { padding-left: 24px; padding-right: 24px; }
+    header .fila, main { max-width: 1040px; margin: 0 auto; }
+    .producto-campos { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 10px; }
+    .producto-campos .grid2 { display: contents; }
+    .producto-campos .campo { margin-bottom: 0; }
+    .encabezados, .ing { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.2fr) 36px; gap: 8px; align-items: center; }
+    .encabezados { font-size: 12px; color: var(--suave); padding-bottom: 4px; border-bottom: 1px solid var(--borde); }
+    .encabezados span:nth-child(4) { text-align: right; }
+    .ing { padding: 6px 0; }
+    .ing .arriba, .ing .abajo { display: contents; }
+    .ing .quitar { order: 5; }
+    .ing .falta { grid-column: 1 / -1; margin-top: 0; order: 6; }
+    .resumen .datos { grid-template-columns: repeat(6, 1fr); max-width: 1040px; }
+    .acciones { max-width: 1040px; }
+    .acciones .btn { flex: 0 0 260px; margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>🥐 Recetas Panaderoso</span><button class="btn-ajustes" id="btnAjustes" title="Conectar hoja" aria-label="Conectar hoja">⚙️</button></h1>
+  <div class="fila">
+    <select id="selReceta" aria-label="Receta"></select>
+    <button class="btn-claro" id="btnNueva">+ Nueva</button>
+  </div>
+</header>
+<div class="offline" id="offline">Sin internet: estás viendo tu última copia. Para guardar necesitas señal.</div>
+
+<main>
+  <div id="aviso" class="aviso"></div>
+  <div id="cargando" class="cargando">Cargando tus recetas…</div>
+
+  <div id="editor" hidden>
+    <section class="tarjeta">
+      <h2>Producto</h2>
+      <div class="producto-campos">
+      <div class="campo"><label for="nombre">Nombre</label><input id="nombre" placeholder="Ej. Rol de canela"></div>
+      <div class="grid2">
+        <div class="campo"><label for="piezas">Piezas que salen por batch</label><input id="piezas" type="number" inputmode="decimal" min="0"></div>
+        <div class="campo"><label for="indirectos">Gas, luz y merma por batch ($)</label><input id="indirectos" type="number" inputmode="decimal" min="0"></div>
+        <div class="campo"><label for="mayoreo">Precio mayoreo ($)</label><input id="mayoreo" type="number" inputmode="decimal" min="0"></div>
+        <div class="campo"><label for="menudeo">Precio menudeo ($)</label><input id="menudeo" type="number" inputmode="decimal" min="0"></div>
+      </div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Ingredientes del batch</h2>
+      <div class="encabezados"><span>Insumo</span><span>Cantidad</span><span>Parte</span><span>Costo</span><span></span></div>
+      <div id="lista"></div>
+      <button class="btn-linea" id="btnAgregar">+ Agregar ingrediente</button>
+      <p class="nota">Escribe las primeras letras del insumo y elígelo de la lista. El precio sale solo de tu catálogo (tu última compra o tu precio de referencia).</p>
+    </section>
+
+    <section class="tarjeta" id="extras">
+      <h2>Más opciones</h2>
+      <div class="fila">
+        <button class="btn-texto" id="btnDuplicar">📄 Duplicar esta receta</button>
+        <button class="btn-texto" id="btnBorrar">🗑️ Borrar receta</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="resumen" id="resumen" hidden>
+  <div class="datos">
+    <div class="dato"><b id="rIng">$0</b><span>Ingredientes</span></div>
+    <div class="dato"><b id="rBatch">$0</b><span>Costo del batch</span></div>
+    <div class="dato"><b id="rPieza">$0</b><span>Costo por pieza</span></div>
+    <div class="dato"><b id="rMen">–</b><span>Margen menudeo</span></div>
+    <div class="dato"><b id="rMay">–</b><span>Margen mayoreo</span></div>
+    <div class="dato"><b id="rSug">–</b><span id="rSugTxt">Precio sugerido</span></div>
+  </div>
+  <div class="acciones"><button class="btn" id="btnGuardar">Guardar receta</button></div>
+</div>
+
+<div class="modal" id="modalInsumo">
+  <div class="caja">
+    <h3>Nuevo insumo en tu catálogo</h3>
+    <div class="campo"><label for="iNombre">Nombre</label><input id="iNombre"></div>
+    <div class="grid2">
+      <div class="campo"><label for="iUnidad">Lo mides en</label><select id="iUnidad"></select></div>
+      <div class="campo"><label for="iCategoria">Categoría</label><select id="iCategoria"></select></div>
+    </div>
+    <div class="campo"><label for="iPresentacion">Cómo lo compras</label><input id="iPresentacion" placeholder="Ej. Bolsa 1 kg"></div>
+    <div class="grid2">
+      <div class="campo"><label for="iContenido">Cuánto trae (en la unidad)</label><input id="iContenido" type="number" inputmode="decimal" placeholder="Ej. 1000"></div>
+      <div class="campo"><label for="iPrecio">Cuánto cuesta ($)</label><input id="iPrecio" type="number" inputmode="decimal" placeholder="Ej. 50"></div>
+    </div>
+    <div class="acciones"><button class="btn-texto" id="iCancelar">Cancelar</button><button class="btn" id="iGuardar">Agregar al catálogo</button></div>
+  </div>
+</div>
+
+<div class="modal" id="modalAjustes">
+  <div class="caja">
+    <h3>Conectar con tu hoja</h3>
+    <p class="nota">Pega la URL de tu aplicación web de Apps Script (la que termina en <b>/exec</b>, la misma de tu Libro de cuentas). Solo se guarda en este aparato.</p>
+    <div class="campo"><label for="aUrl">URL /exec</label><input id="aUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec"></div>
+    <div class="acciones"><button class="btn-texto" id="aCancelar">Cancelar</button><button class="btn" id="aGuardar">Conectar</button></div>
+  </div>
+</div>
+
+<datalist id="dlInsumos"></datalist>
+<datalist id="dlPartes"></datalist>
+
+<script>
+/* ---------- Conexión con la hoja (reemplaza google.script.run) ---------- */
+var CLAVE_URL = 'panaderoso.exec', CLAVE_DATOS = 'panaderoso.datos';
+function leerLS(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function guardarLS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function urlExec() { return leerLS(CLAVE_URL) || ''; }
+function datosGuardados() { try { return JSON.parse(leerLS(CLAVE_DATOS) || 'null'); } catch (e) { return null; } }
+
+function pedirHoja(accion, arg) {
+  var u = urlExec();
+  if (!u) return Promise.reject(new Error('Primero conecta tu hoja con el botón ⚙️.'));
+  var p = accion === 'recetarioDatos'
+    ? fetch(u + (u.indexOf('?') < 0 ? '?' : '&') + 'accion=recetas&t=' + Date.now())
+    // text/plain evita el permiso extra (CORS) que Apps Script no contesta
+    : fetch(u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                 body: JSON.stringify({ accion: accion, arg: arg }) });
+  return p.then(function (r) { return r.json(); }, function () {
+      throw new Error(navigator.onLine ? 'No pude llegar a tu hoja. Revisa la URL en ⚙️.' : 'Sin internet: no se guardó nada. Intenta de nuevo con señal.');
+    })
+    .then(function (j) {
+      if (!j || !j.ok) throw new Error((j && j.error) || 'Tu hoja contestó algo raro. ¿Ya pegaste el Codigo.gs nuevo y publicaste una nueva versión?');
+      guardarLS(CLAVE_DATOS, JSON.stringify(j.datos));
+      return j.datos;
+    }, function (e) {
+      throw e instanceof SyntaxError ? new Error('Tu hoja no contestó con datos. Revisa que la URL sea la /exec y que el acceso sea "Cualquier persona".') : e;
+    });
+}
+
+function Corredor() { this.ok = function () {}; this.mal = function () {}; }
+Corredor.prototype.withSuccessHandler = function (f) { this.ok = f; return this; };
+Corredor.prototype.withFailureHandler = function (f) { this.mal = f; return this; };
+['recetarioDatos', 'guardarReceta', 'borrarReceta', 'agregarInsumo'].forEach(function (n) {
+  Corredor.prototype[n] = function (arg) { var c = this; pedirHoja(n, arg).then(function (d) { c.ok(d); }, function (e) { c.mal(e); }); };
+});
+var google = { script: {} };
+Object.defineProperty(google.script, 'run', { get: function () { return new Corredor(); } });
+</script>
+<script>
+var D = null;          // datos de la hoja
+var actual = null;     // receta en edición
+var cambios = false;
+var $ = function (id) { return document.getElementById(id); };
+var NUEVA = '__nueva__';
+
+function dinero(n) {
+  if (n === '' || n === null || isNaN(n)) return '–';
+  var dec = Math.abs(n) < 10 ? 2 : (Math.abs(n) < 1000 ? 2 : 0);
+  return '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function pct(n) { return (n === '' || isNaN(n)) ? '–' : Math.round(n * 100) + '%'; }
+function sinAcentos(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase(); }
+function insumoPorNombre(n) {
+  var b = sinAcentos(n);
+  for (var i = 0; i < D.insumos.length; i++) if (sinAcentos(D.insumos[i].nombre) === b) return D.insumos[i];
+  return null;
+}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+function avisar(texto, tipo) {
+  var a = $('aviso'); a.textContent = texto; a.className = 'aviso ' + (tipo || 'ok');
+  if (tipo !== 'error') setTimeout(function () { if (a.textContent === texto) a.className = 'aviso'; }, 3500);
+  window.scrollTo(0, 0);
+}
+
+function llamar(fn, arg, listo) {
+  $('btnGuardar').disabled = true;
+  google.script.run
+    .withSuccessHandler(function (r) { $('btnGuardar').disabled = false; listo(r); })
+    .withFailureHandler(function (e) { $('btnGuardar').disabled = false; avisar(e.message || String(e), 'error'); })[fn](arg);
+}
+
+function cargar(datos, elegir) {
+  D = datos;
+  $('dlInsumos').innerHTML = D.insumos.map(function (i) { return '<option value="' + esc(i.nombre) + '">'; }).join('');
+  $('dlPartes').innerHTML = D.partes.map(function (p) { return '<option value="' + esc(p) + '">'; }).join('');
+  $('iUnidad').innerHTML = D.unidades.map(function (u) { return '<option>' + esc(u) + '</option>'; }).join('');
+  $('iCategoria').innerHTML = D.categorias.map(function (u) { return '<option>' + esc(u) + '</option>'; }).join('');
+  var opciones = D.productos.map(function (p) { return '<option value="' + esc(p.nombre) + '">' + esc(p.nombre) + '</option>'; });
+  opciones.push('<option value="' + NUEVA + '">+ Receta nueva…</option>');
+  $('selReceta').innerHTML = opciones.join('');
+  $('cargando').hidden = true; $('editor').hidden = false; $('resumen').hidden = false;
+  var nombre = elegir !== undefined ? elegir : (D.productos[0] ? D.productos[0].nombre : NUEVA);
+  abrir(nombre);
+}
+
+function abrir(nombre) {
+  if (nombre === NUEVA) {
+    actual = { original: '', nombre: '', piezas: '', indirectos: D.indirectoDefault, mayoreo: '', menudeo: '',
+               ingredientes: [{ insumo: '', cantidad: '', parte: 'Masa' }] };
+  } else {
+    var p = D.productos.filter(function (x) { return x.nombre === nombre; })[0] || { nombre: nombre };
+    actual = { original: p.nombre, nombre: p.nombre, piezas: p.piezas, indirectos: p.indirectos,
+               mayoreo: p.mayoreo, menudeo: p.menudeo,
+               ingredientes: (D.recetas[p.nombre] || []).map(function (i) { return { insumo: i.insumo, cantidad: i.cantidad, parte: i.parte }; }) };
+    if (!actual.ingredientes.length) actual.ingredientes.push({ insumo: '', cantidad: '', parte: 'Masa' });
+  }
+  $('selReceta').value = actual.original || NUEVA;
+  ['nombre', 'piezas', 'indirectos', 'mayoreo', 'menudeo'].forEach(function (k) { $(k).value = actual[k] === undefined ? '' : actual[k]; });
+  $('btnBorrar').hidden = !actual.original;
+  $('btnDuplicar').hidden = !actual.original;
+  pintarLista();
+  cambios = false;
+  if (!actual.original) $('nombre').focus();
+}
+
+function pintarLista() {
+  $('lista').innerHTML = actual.ingredientes.map(function (i, n) {
+    return '<div class="ing" data-n="' + n + '">' +
+      '<div class="arriba"><input list="dlInsumos" class="cIns" placeholder="Insumo (ej. harina)" value="' + esc(i.insumo) + '">' +
+      '<button class="quitar" title="Quitar" data-quitar="' + n + '">×</button></div>' +
+      '<div class="abajo"><div class="cant"><input class="cCant" type="number" inputmode="decimal" min="0" placeholder="Cant." value="' + esc(i.cantidad) + '"><span class="cUni"></span></div>' +
+      '<input class="cParte" list="dlPartes" placeholder="Parte" value="' + esc(i.parte) + '">' +
+      '<div class="costo cCosto"></div></div>' +
+      '<div class="falta cFalta" hidden></div></div>';
+  }).join('');
+  recalcular();
+}
+
+function recalcular() {
+  var total = 0;
+  document.querySelectorAll('.ing').forEach(function (el) {
+    var i = actual.ingredientes[Number(el.dataset.n)];
+    var ins = insumoPorNombre(i.insumo);
+    var cant = Number(i.cantidad) || 0;
+    el.querySelector('.cUni').textContent = ins ? ins.unidad : '';
+    var falta = el.querySelector('.cFalta');
+    if (i.insumo && !ins) {
+      falta.hidden = false;
+      falta.innerHTML = 'No está en tu catálogo. <a data-nuevo="' + esc(i.insumo) + '">Agregarlo</a>';
+    } else if (ins && !ins.costo) {
+      falta.hidden = false; falta.textContent = 'Este insumo no tiene precio todavía (ponlo en Insumos o registra una compra).';
+    } else falta.hidden = true;
+    var costo = ins ? cant * ins.costo : 0;
+    total += costo;
+    el.querySelector('.cCosto').innerHTML = (ins && cant) ? dinero(costo) + '<small>' + dinero(ins.costo) + '/' + esc(ins.unidad) + '</small>' : '';
+  });
+  var ind = Number($('indirectos').value) || 0, pz = Number($('piezas').value) || 0;
+  var batch = total + ind, pieza = pz ? batch / pz : '';
+  var men = Number($('menudeo').value) || 0, may = Number($('mayoreo').value) || 0;
+  $('rIng').textContent = dinero(total);
+  $('rBatch').textContent = dinero(batch);
+  $('rPieza').textContent = pz ? dinero(pieza) : 'pon piezas';
+  marcarMargen('rMen', men && pz ? (men - pieza) / men : '');
+  marcarMargen('rMay', may && pz ? (may - pieza) / may : '');
+  $('rSug').textContent = pz ? dinero(pieza / (1 - D.margenObjetivo)) : '–';
+  $('rSugTxt').textContent = 'Precio sugerido (' + Math.round(D.margenObjetivo * 100) + '%)';
+}
+
+function marcarMargen(id, m) {
+  var el = $(id); el.textContent = pct(m);
+  el.className = m === '' ? '' : (m >= D.margenObjetivo ? 'bien' : (m < 0.3 ? 'mal' : ''));
+}
+
+/* ---------- Eventos ---------- */
+
+$('lista').addEventListener('input', function (e) {
+  var el = e.target.closest('.ing'); if (!el) return;
+  var i = actual.ingredientes[Number(el.dataset.n)];
+  if (e.target.classList.contains('cIns')) i.insumo = e.target.value;
+  if (e.target.classList.contains('cCant')) i.cantidad = e.target.value;
+  if (e.target.classList.contains('cParte')) i.parte = e.target.value;
+  cambios = true; recalcular();
+});
+$('lista').addEventListener('click', function (e) {
+  var q = e.target.getAttribute('data-quitar');
+  if (q !== null) { actual.ingredientes.splice(Number(q), 1); cambios = true; pintarLista(); return; }
+  var nuevo = e.target.getAttribute('data-nuevo');
+  if (nuevo !== null) abrirModalInsumo(nuevo);
+});
+['nombre', 'piezas', 'indirectos', 'mayoreo', 'menudeo'].forEach(function (k) {
+  $(k).addEventListener('input', function () { actual[k] = $(k).value; cambios = true; recalcular(); });
+});
+$('btnAgregar').addEventListener('click', function () {
+  var ult = actual.ingredientes[actual.ingredientes.length - 1];
+  actual.ingredientes.push({ insumo: '', cantidad: '', parte: ult ? ult.parte : 'Masa' });
+  pintarLista();
+  var ins = document.querySelectorAll('.cIns'); ins[ins.length - 1].focus();
+});
+$('selReceta').addEventListener('change', function () {
+  if (cambios && !confirm('Tienes cambios sin guardar. ¿Salir sin guardar?')) { $('selReceta').value = actual.original || NUEVA; return; }
+  abrir($('selReceta').value);
+});
+$('btnNueva').addEventListener('click', function () {
+  if (cambios && !confirm('Tienes cambios sin guardar. ¿Salir sin guardar?')) return;
+  abrir(NUEVA);
+});
+$('btnDuplicar').addEventListener('click', function () {
+  actual.original = ''; actual.nombre = actual.nombre + ' (copia)';
+  $('nombre').value = actual.nombre; $('selReceta').value = NUEVA;
+  $('btnBorrar').hidden = true; $('btnDuplicar').hidden = true;
+  cambios = true; $('nombre').focus(); $('nombre').select();
+  avisar('Es una copia. Cámbiale el nombre y lo que quieras, y dale Guardar.');
+});
+$('btnBorrar').addEventListener('click', function () {
+  if (!confirm('¿Borrar la receta "' + actual.original + '"? Se quita de Recetas y de Productos.')) return;
+  var nombre = actual.original;
+  llamar('borrarReceta', nombre, function (d) { cambios = false; cargar(d); avisar('Receta borrada.'); });
+});
+$('btnGuardar').addEventListener('click', function () {
+  actual.nombre = $('nombre').value.trim();
+  var desconocidos = actual.ingredientes.filter(function (i) { return i.insumo && !insumoPorNombre(i.insumo); });
+  if (desconocidos.length) { avisar('Primero agrega "' + desconocidos[0].insumo + '" a tu catálogo (link "Agregarlo").', 'error'); return; }
+  // Usa el nombre exacto del catálogo para que la hoja lo encuentre.
+  actual.ingredientes.forEach(function (i) { var ins = insumoPorNombre(i.insumo); if (ins) i.insumo = ins.nombre; });
+  var nombre = actual.nombre;
+  llamar('guardarReceta', actual, function (d) { cambios = false; cargar(d, nombre); avisar('✅ Guardada. Ya se actualizó en Recetas y Productos.'); });
+});
+
+/* ---------- Nuevo insumo ---------- */
+
+var filaPendiente = null;
+function abrirModalInsumo(nombre) {
+  filaPendiente = nombre;
+  $('iNombre').value = nombre; $('iPresentacion').value = ''; $('iContenido').value = ''; $('iPrecio').value = '';
+  $('modalInsumo').classList.add('abierto');
+}
+$('iCancelar').addEventListener('click', function () { $('modalInsumo').classList.remove('abierto'); });
+$('iGuardar').addEventListener('click', function () {
+  var nuevo = { nombre: $('iNombre').value.trim(), unidad: $('iUnidad').value, categoria: $('iCategoria').value,
+                presentacion: $('iPresentacion').value.trim(), contenido: $('iContenido').value, precio: $('iPrecio').value };
+  google.script.run
+    .withSuccessHandler(function (d) {
+      $('modalInsumo').classList.remove('abierto');
+      D.insumos = d.insumos;
+      $('dlInsumos').innerHTML = D.insumos.map(function (i) { return '<option value="' + esc(i.nombre) + '">'; }).join('');
+      actual.ingredientes.forEach(function (i) { if (i.insumo === filaPendiente) i.insumo = nuevo.nombre; });
+      pintarLista();
+      avisar('Insumo agregado a tu catálogo.');
+    })
+    .withFailureHandler(function (e) { alert(e.message || String(e)); })
+    .agregarInsumo(nuevo);
+});
+
+window.addEventListener('beforeunload', function (e) { if (cambios) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---------- Ajustes y arranque ---------- */
+
+function abrirAjustes() { $('aUrl').value = urlExec(); $('modalAjustes').classList.add('abierto'); $('aUrl').focus(); }
+$('btnAjustes').addEventListener('click', abrirAjustes);
+$('aCancelar').addEventListener('click', function () { $('modalAjustes').classList.remove('abierto'); });
+$('aGuardar').addEventListener('click', function () {
+  var u = $('aUrl').value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec\/?$/.test(u)) { alert('La URL debe empezar con https://script.google.com/ y terminar en /exec'); return; }
+  guardarLS(CLAVE_URL, u.replace(/\/$/, ''));
+  $('aGuardar').disabled = true; $('aGuardar').textContent = 'Probando…';
+  google.script.run
+    .withSuccessHandler(function (d) {
+      $('aGuardar').disabled = false; $('aGuardar').textContent = 'Conectar';
+      $('modalAjustes').classList.remove('abierto'); cambios = false; cargar(d); avisar('✅ Conectada a tu hoja.');
+    })
+    .withFailureHandler(function (e) {
+      $('aGuardar').disabled = false; $('aGuardar').textContent = 'Conectar';
+      alert(e.message || String(e));
+    })
+    .recetarioDatos();
+});
+
+function marcarConexion() { $('offline').className = 'offline' + (navigator.onLine ? '' : ' si'); }
+window.addEventListener('online', function () { marcarConexion(); refrescar(); });
+window.addEventListener('offline', marcarConexion);
+marcarConexion();
+
+// Trae lo último de la hoja sin pisar lo que estés editando.
+function refrescar() {
+  if (!urlExec()) return;
+  google.script.run
+    .withSuccessHandler(function (d) {
+      if (cambios && D) { D = d; return; }
+      cargar(d, D && actual ? (actual.original || undefined) : undefined);
+    })
+    .withFailureHandler(function (e) {
+      if (!D) $('cargando').textContent = 'No pude leer la hoja: ' + (e.message || e);
+    })
+    .recetarioDatos();
+}
+
+var copia = datosGuardados();
+if (copia) cargar(copia);
+if (!urlExec()) { $('cargando').textContent = 'Conecta tu hoja para empezar (botón ⚙️ arriba).'; abrirAjustes(); }
+else refrescar();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>

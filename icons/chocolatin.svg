@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="masa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2b860"/>
+      <stop offset="0.55" stop-color="#d98a32"/>
+      <stop offset="1" stop-color="#a85a1c"/>
+    </linearGradient>
+    <linearGradient id="choco" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a2e17"/>
+      <stop offset="1" stop-color="#2e140a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#fbf1e2"/>
+  <!-- barras de chocolate que asoman -->
+  <rect x="68" y="214" width="70" height="30" rx="7" fill="url(#choco)"/>
+  <rect x="68" y="262" width="70" height="30" rx="7" fill="url(#choco)"/>
+  <rect x="374" y="214" width="70" height="30" rx="7" fill="url(#choco)"/>
+  <rect x="374" y="262" width="70" height="30" rx="7" fill="url(#choco)"/>
+  <!-- sombra -->
+  <ellipse cx="256" cy="372" rx="168" ry="18" fill="#000" opacity=".10"/>
+  <!-- pan -->
+  <path d="M110 200 C110 160 140 146 180 146 L332 146 C372 146 402 160 402 200 L402 318 C402 346 380 362 350 362 L162 362 C132 362 110 346 110 318 Z" fill="url(#masa)"/>
+  <!-- capas del hojaldre -->
+  <g fill="none" stroke="#8a4614" stroke-width="7" stroke-linecap="round" opacity=".55">
+    <path d="M128 232 C200 220 312 220 384 232"/>
+    <path d="M124 270 C200 258 312 258 388 270"/>
+    <path d="M126 308 C200 296 312 296 386 308"/>
+  </g>
+  <!-- brillo -->
+  <path d="M150 178 C200 164 300 164 352 176" fill="none" stroke="#fff3cf" stroke-width="12" stroke-linecap="round" opacity=".7"/>
+</svg>
