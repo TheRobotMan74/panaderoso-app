@@ -201,11 +201,16 @@ function pedirHoja(accion, arg) {
     // text/plain evita el permiso extra (CORS) que Apps Script no contesta
     : fetch(u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                  body: JSON.stringify({ accion: accion, arg: arg }) });
-  return p.then(function (r) { return r.json(); }, function () {
+  // Si Google no contesta en 40 s, avisa en vez de quedarse cargando para siempre.
+  p = Promise.race([p, new Promise(function (_, no) { setTimeout(function () { no(new Error('tiempo')); }, 40000); })]);
+  return p.then(function (r) { return r.json(); }, function (e) {
+      if (e && e.message === 'tiempo') throw new Error('Tu hoja tardó demasiado en contestar. Revisa la URL en ⚙️ o intenta otra vez.');
       throw new Error(navigator.onLine ? 'No pude llegar a tu hoja. Revisa la URL en ⚙️.' : 'Sin internet: no se guardó nada. Intenta de nuevo con señal.');
     })
     .then(function (j) {
       if (!j || !j.ok) throw new Error((j && j.error) || 'Tu hoja contestó algo raro. ¿Ya pegaste el Codigo.gs nuevo y publicaste una nueva versión?');
+      if (!j.datos) throw new Error('Tu hoja contestó, pero con la versión vieja del conector. En Apps Script: Implementar > Gestionar implementaciones > ✏️ > Versión: Nueva versión > Implementar.');
+      if (accion === 'recetarioDatos' && !j.datos.productos) throw new Error('Tu hoja no mandó las recetas. Revisa que Recetario.gs esté pegado en Apps Script y publica una nueva versión.');
       guardarLS(CLAVE_DATOS, JSON.stringify(j.datos));
       return j.datos;
     }, function (e) {
@@ -217,7 +222,11 @@ function Corredor() { this.ok = function () {}; this.mal = function () {}; }
 Corredor.prototype.withSuccessHandler = function (f) { this.ok = f; return this; };
 Corredor.prototype.withFailureHandler = function (f) { this.mal = f; return this; };
 ['recetarioDatos', 'guardarReceta', 'borrarReceta', 'agregarInsumo'].forEach(function (n) {
-  Corredor.prototype[n] = function (arg) { var c = this; pedirHoja(n, arg).then(function (d) { c.ok(d); }, function (e) { c.mal(e); }); };
+  Corredor.prototype[n] = function (arg) {
+    var c = this;
+    pedirHoja(n, arg).then(function (d) { c.ok(d); })
+      .catch(function (e) { try { c.mal(e); } catch (e2) { alert(e.message || String(e)); } });
+  };
 });
 var google = { script: {} };
 Object.defineProperty(google.script, 'run', { get: function () { return new Corredor(); } });
